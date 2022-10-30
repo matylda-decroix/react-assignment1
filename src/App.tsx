@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import "./App.css";
+import { useQuery } from "@tanstack/react-query";
 
 interface User {
   id: number;
@@ -18,18 +18,23 @@ interface User {
 }
 
 function App() {
-  const [users, setUsers] = useState<User[]>([]);
-  useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users").then((res) =>
-      res.json().then((res) => {
-        setUsers(res);
-      })
-    );
-  }, []);
+  const { data, isLoading } = useQuery(
+    ["users"],
+    (): Promise<User[]> =>
+      fetch("https://jsonplaceholder.typicode.com/users").then((res) =>
+        res.json()
+      ),
+    {
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+    }
+  );
+  const users = data;
   return (
     <>
+      {isLoading === true && <div>Loading user data...</div>}
       <div>
-        {users.map((user) => {
+        {users?.map((user) => {
           return (
             <div key={user.id}>
               <div>
